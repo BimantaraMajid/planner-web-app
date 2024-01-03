@@ -29,7 +29,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       <div>
-        hello this is staging
+        Hello this is staging
       </div>
     </>
   )
