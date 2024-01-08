@@ -1,4 +1,4 @@
-import { Badge, Button, Col, Container, Row, Stack } from "react-bootstrap";
+import { Badge, Button, Col, Row, Stack } from "react-bootstrap";
 import moment, { Moment } from "moment";
 import { useState } from "react";
 
@@ -8,15 +8,19 @@ interface GetMatrixCalendarParams {
 }
 
 function getMatrixCalendar({
-  _month = 0,
+  _month = moment().month(),
   _year = moment().year(),
 }: GetMatrixCalendarParams): Array<Array<Moment>> {
-  const now = moment().year(_year).month(_month);
-  const startWeekOfMonth = now.startOf("month").week();
-  const endWeekOfMonth = now.endOf("month").week();
-  const rangeWeek = Array(endWeekOfMonth - startWeekOfMonth + 1)
+  const dateMatrix = moment().year(_year).month(_month);
+  const startWeekOfMonth = dateMatrix.startOf("month").week();
+  const rangeWeek = Array(5)
     .fill(undefined)
-    .map((_, idx) => startWeekOfMonth + idx);
+    .map((_, idx) =>
+      dateMatrix
+        .clone()
+        .week(startWeekOfMonth + idx)
+        .week()
+    );
   const matrixCalendar = rangeWeek.map((week) => {
     return Array(7)
       .fill(undefined)
@@ -37,20 +41,54 @@ function isThisMonth(date: Moment, _month = 0) {
   return false;
 }
 
-function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
+function Header({
+  toggleSidebar,
+  baseDate = moment(),
+  setToday,
+  increaseMonth,
+  decreaseMonth,
+}: {
+  toggleSidebar: () => void;
+  baseDate: Moment;
+  setToday: () => void;
+  increaseMonth: () => void;
+  decreaseMonth: () => void;
+}) {
   return (
-    <Stack
-      direction="horizontal"
+    <Row
       className="sticky-top bg-white p-2 border-bottom"
+      style={{
+        flexWrap: "unset",
+      }}
     >
-      <Stack gap={2} direction="horizontal">
-        <Button variant="light" onClick={toggleSidebar}>
-          <i className="bi bi-list"></i>
-        </Button>
-        Logo
-      </Stack>
-      <div className="ms-auto">user</div>
-    </Stack>
+      <Col>
+        <Stack direction="horizontal" gap={2}>
+          <span style={{ minWidth: "100px" }}>Logo</span>
+          <Button variant="outline-secondary" onClick={setToday}>
+            Today
+          </Button>
+          <Button
+            className="bi bi-chevron-left bg-white  border border-0"
+            variant="light"
+            onClick={decreaseMonth}
+          ></Button>
+          <Button
+            className="bi bi-chevron-right bg-white border border-0"
+            variant="light"
+            onClick={increaseMonth}
+          ></Button>
+          <span>{baseDate.format("MMMM Y")}</span>
+        </Stack>
+      </Col>
+      <Col xs={2}>
+        <Stack gap={2} direction="horizontal">
+          <span className="ms-auto">user</span>
+          <Button variant="light" onClick={toggleSidebar}>
+            <i className="bi bi-list"></i>
+          </Button>
+        </Stack>
+      </Col>
+    </Row>
   );
 }
 
@@ -64,20 +102,33 @@ function Sidebar() {
 
 function Calendar({
   monthMatrix,
-  indexMonth,
+  indexMonth = moment().month(),
+  indexYear = moment().year(),
 }: {
   monthMatrix: Array<Array<Moment>>;
   indexMonth: number;
+  indexYear: number;
 }) {
+  const oneDayBefore = moment()
+    .year(indexYear)
+    .month(indexMonth)
+    .startOf("month")
+    .subtract(1, "day");
+  const oneDayAfter = moment()
+    .year(indexYear)
+    .month(indexMonth + 1)
+    .startOf("month");
   return monthMatrix.map((week, wIndex) => (
-    <Row key={wIndex}>
+    <Row
+      key={wIndex}
+      style={{
+        flexWrap: "unset",
+      }}
+    >
       {week.map((day, dIndex) => (
         <Col
           key={`${wIndex} ${dIndex}`}
           className="border-end border-bottom p-1"
-          style={{
-            minHeight: "200px",
-          }}
         >
           <Stack
             gap={0}
@@ -90,7 +141,8 @@ function Calendar({
               <span className="text-center">{day.format("ddd")}</span>
             )}
             <span className="text-center">
-              {!isThisMonth(day, indexMonth) && day.format("MMM")}
+              {(day.isSame(oneDayBefore) || day.isSame(oneDayAfter)) &&
+                day.format("MMM")}
               &nbsp;
               {day.format("D")}
             </span>
@@ -106,31 +158,63 @@ function Calendar({
 
 function HomePage() {
   const [showSidebar, setShowSidebar] = useState(true);
-  const [indexMonth] = useState(moment().month());
+  const [isoDate, setIsoDate] = useState(
+    moment().startOf("month").toISOString()
+  );
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
   };
 
-  const monthMatrix = getMatrixCalendar({ _month: indexMonth });
+  const baseDate = moment(isoDate);
+  const monthMatrix = getMatrixCalendar({
+    _month: baseDate.month(),
+    _year: baseDate.year(),
+  });
+
+  const setToday = () => {
+    setIsoDate(moment().startOf("month").toISOString());
+  };
+
+  const increaseMonth = () => {
+    setIsoDate((prevMonth) => moment(prevMonth).add(1, "month").toISOString());
+  };
+
+  const decreaseMonth = () => {
+    setIsoDate((prevMonth) =>
+      moment(prevMonth).subtract(1, "month").toISOString()
+    );
+  };
 
   return (
     <>
-      <Header toggleSidebar={toggleSidebar}></Header>
-      <Container fluid>
-        <Row className="">
-          {showSidebar && (
-            <Col xs={2}>
-              <Sidebar></Sidebar>
-            </Col>
-          )}
-          <Col className="border-start border-top" style={{ margin: "-1px" }}>
-            <Calendar
-              monthMatrix={monthMatrix}
-              indexMonth={indexMonth}
-            ></Calendar>
+      <Header
+        toggleSidebar={toggleSidebar}
+        baseDate={baseDate}
+        setToday={setToday}
+        increaseMonth={increaseMonth}
+        decreaseMonth={decreaseMonth}
+      ></Header>
+      <Row
+        style={{
+          flexWrap: "unset",
+        }}
+      >
+        <Col
+          className="border-start border-top ms-2"
+          style={{ marginTop: "-1px" }}
+        >
+          <Calendar
+            monthMatrix={monthMatrix}
+            indexMonth={baseDate.month()}
+            indexYear={baseDate.year()}
+          ></Calendar>
+        </Col>
+        {showSidebar && (
+          <Col xs={2}>
+            <Sidebar></Sidebar>
           </Col>
-        </Row>
-      </Container>
+        )}
+      </Row>
     </>
   );
 }
