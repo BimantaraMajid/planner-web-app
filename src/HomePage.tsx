@@ -1,6 +1,6 @@
 import { Badge, Button, Col, Row, Stack } from "react-bootstrap";
 import moment, { Moment } from "moment";
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 interface GetMatrixCalendarParams {
   _month?: number;
@@ -47,47 +47,44 @@ function Header({
   setToday,
   increaseMonth,
   decreaseMonth,
+  width = 0,
 }: {
   toggleSidebar: () => void;
   baseDate: Moment;
   setToday: () => void;
   increaseMonth: () => void;
   decreaseMonth: () => void;
+  width?: number;
 }) {
   return (
-    <Row
-      className="sticky-top bg-white p-2 border-bottom"
-      style={{
-        flexWrap: "unset",
-      }}
-    >
-      <Col>
-        <Stack direction="horizontal" gap={2}>
-          <span style={{ minWidth: "100px" }}>Logo</span>
-          <Button variant="outline-secondary" onClick={setToday}>
-            Today
-          </Button>
+    <Row className="col p-2 border-bottom">
+      <Stack gap={3} direction="horizontal">
+        <div style={{ minWidth: "100px" }}>Logo</div>
+        <Button size="sm" variant="outline-secondary" onClick={setToday}>
+          Today
+        </Button>
+        <div className="text-nowrap">
           <Button
-            className="bi bi-chevron-left bg-white  border border-0"
+            size="sm"
+            className="bi bi-chevron-left rounded-circle border border-0"
             variant="light"
             onClick={decreaseMonth}
           ></Button>
           <Button
-            className="bi bi-chevron-right bg-white border border-0"
+            size="sm"
+            className="bi bi-chevron-right rounded-circle border border-0"
             variant="light"
             onClick={increaseMonth}
           ></Button>
-          <span>{baseDate.format("MMMM Y")}</span>
-        </Stack>
-      </Col>
-      <Col xs={2}>
-        <Stack gap={2} direction="horizontal">
-          <span className="ms-auto">user</span>
-          <Button variant="light" onClick={toggleSidebar}>
+        </div>
+        <div className="text-nowrap">{baseDate.format("MMMM Y")}</div>
+        <div className="ms-auto">user</div>
+        {width > 570 && (
+          <Button size="sm" variant="light" className="rounded-circle" onClick={toggleSidebar}>
             <i className="bi bi-list"></i>
           </Button>
-        </Stack>
-      </Col>
+        )}
+      </Stack>
     </Row>
   );
 }
@@ -118,20 +115,25 @@ function Calendar({
     .year(indexYear)
     .month(indexMonth + 1)
     .startOf("month");
+  const today = moment().startOf("day");
   return monthMatrix.map((week, wIndex) => (
     <Row
       key={wIndex}
       style={{
         flexWrap: "unset",
+        minHeight: "18vh",
       }}
     >
       {week.map((day, dIndex) => (
         <Col
           key={`${wIndex} ${dIndex}`}
-          className="border-end border-bottom p-1"
+          className={
+            "border-end border-bottom p-1" +
+            (dIndex === week.length - 1 ? "order-1" : "order-2")
+          }
         >
           <Stack
-            gap={0}
+            gap={1}
             style={{
               opacity: isThisMonth(day, indexMonth) ? 1 : 0.5,
             }}
@@ -140,12 +142,14 @@ function Calendar({
             {wIndex === 0 && (
               <span className="text-center">{day.format("ddd")}</span>
             )}
-            <span className="text-center">
+            <div className="text-center">
               {(day.isSame(oneDayBefore) || day.isSame(oneDayAfter)) &&
                 day.format("MMM")}
               &nbsp;
-              {day.format("D")}
-            </span>
+              <span className={day.isSame(today) ? "badge bg-primary" : ""}>
+                {day.format("D")}
+              </span>
+            </div>
             <Badge bg="success" className="text-start">
               activity
             </Badge>
@@ -156,7 +160,21 @@ function Calendar({
   ));
 }
 
+function useWindowSize() {
+  const [size, setSize] = useState([0, 0]);
+  useLayoutEffect(() => {
+    function updateSize() {
+      setSize([window.innerWidth, window.innerHeight]);
+    }
+    window.addEventListener("resize", updateSize);
+    updateSize();
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+  return size;
+}
+
 function HomePage() {
+  const [width] = useWindowSize();
   const [showSidebar, setShowSidebar] = useState(true);
   const [isoDate, setIsoDate] = useState(
     moment().startOf("month").toISOString()
@@ -193,14 +211,16 @@ function HomePage() {
         setToday={setToday}
         increaseMonth={increaseMonth}
         decreaseMonth={decreaseMonth}
+        width={width}
       ></Header>
       <Row
+        className="mx-2"
         style={{
           flexWrap: "unset",
         }}
       >
         <Col
-          className="border-start border-top ms-2"
+          className="border-start border-top"
           style={{ marginTop: "-1px" }}
         >
           <Calendar
@@ -209,7 +229,8 @@ function HomePage() {
             indexYear={baseDate.year()}
           ></Calendar>
         </Col>
-        {showSidebar && (
+
+        {showSidebar && width > 570 && (
           <Col xs={2}>
             <Sidebar></Sidebar>
           </Col>
