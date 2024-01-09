@@ -10,11 +10,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+playground/*
+redux-template/*
 *.local
 
 # Editor directories and files
 .vscode/*
-playground/*
 !.vscode/extensions.json
 .idea
 .DS_Store
