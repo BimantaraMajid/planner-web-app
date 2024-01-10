@@ -31,3 +31,4 @@ build
 
 # folder
 playground/*
+.env.*
