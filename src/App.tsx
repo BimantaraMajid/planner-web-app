@@ -1,32 +1,29 @@
-import { Route, Routes } from "react-router-dom";
-import NotFoundPage from "./NotFoundPage";
-import HomePage from "./HomePage";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./reducers";
-import { login } from "./actions/authActions";
+import { Route, Routes } from "react-router-dom"
+import NotFoundPage from "./pages/404"
+import { MainPage } from "./pages/Main"
+import HomePage from "./pages/Home"
+import { LoginPage } from "./pages/Login"
+import { useAppSelector } from "./app/hooks"
+import { getLogged } from "./features/auth/authSlice"
 
 function App() {
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
+  const isLogged = useAppSelector(getLogged)
 
-  const handleLogin = () => {
-    dispatch(login('test', 'test1234'));
-    console.log("login");
-  };
+  if (!isLogged) {
+    return (
+      <Routes>
+        <Route path="/*" element={<LoginPage />} />
+      </Routes>
+    )
+  }
 
   return (
     <Routes>
       <Route path="/*" element={<NotFoundPage />} />
-      {isAuthenticated ? (
-        <Route path="/" element={<HomePage />} />
-      ) : (
-        <Route path="/login" element={<button onClick={handleLogin}>Login</button>} />
-        
-      )}
+      <Route path="/" element={<MainPage />} />
+      <Route path="/home" element={<HomePage />} />
     </Routes>
-  );
+  )
 }
 
-export default App;
+export default App

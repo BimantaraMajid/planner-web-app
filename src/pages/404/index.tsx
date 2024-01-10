@@ -1,4 +1,4 @@
-import { Container } from "react-bootstrap";
+import { Container } from "react-bootstrap"
 
 const NotFoundPage = () => {
   return (
@@ -8,7 +8,7 @@ const NotFoundPage = () => {
     >
       <h1 className="text-danger">404 : Page Not Found</h1>
     </Container>
-  );
-};
+  )
+}
 
-export default NotFoundPage;
+export default NotFoundPage
