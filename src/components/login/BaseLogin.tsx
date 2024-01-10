@@ -21,9 +21,10 @@ export function BaseLogin() {
     const form = e.currentTarget
     if (form.checkValidity() === false) {
       e.stopPropagation()
+    } else {
+      dispatch(actionLogin({ username, password }))
     }
     setValidated(true)
-    dispatch(actionLogin({ username, password }))
   }
 
   return (
@@ -35,14 +36,14 @@ export function BaseLogin() {
       <Form.Group>
         <Form.Label>Username</Form.Label>
         <Form.Control
-          type="email"
-          placeholder="Enter username"
+          type="text"
+          placeholder="Enter email / username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
         <Form.Control.Feedback type="invalid">
-          Please type valid email
+          Please type valid email / username
         </Form.Control.Feedback>
       </Form.Group>
 
