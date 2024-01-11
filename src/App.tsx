@@ -3,11 +3,17 @@ import NotFoundPage from "./pages/404"
 import { MainPage } from "./pages/Main"
 import HomePage from "./pages/Home"
 import { LoginPage } from "./pages/Login"
-import { useAppSelector } from "./app/hooks"
-import { getLogged } from "./features/auth/authSlice"
+import { useAppDispatch, useAppSelector } from "./app/hooks"
+import { checkToken, getLogged } from "./features/auth/authSlice"
+import { useEffect } from "react"
 
 function App() {
   const isLogged = useAppSelector(getLogged)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(checkToken())
+  }, [dispatch])
 
   if (!isLogged) {
     return (

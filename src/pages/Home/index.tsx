@@ -7,8 +7,8 @@ import "./style.css"
 function HomePage() {
   return (
     <div className="App">
-      <DecreaseButton />
       <LinkAnotherPage />
+      <DecreaseButton />
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <Counter />

@@ -8,7 +8,7 @@ export function SidebarCalendar() {
           className="bg-warning"
           as="textarea"
           placeholder="Type your note here"
-          style={{ height: "100px" }}
+          style={{ height: "150px" }}
         />
       </FloatingLabel>
       <Button>Save</Button>

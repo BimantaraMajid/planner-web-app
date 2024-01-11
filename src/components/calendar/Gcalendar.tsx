@@ -2,15 +2,17 @@ import moment, { Moment } from "moment"
 import { Badge, Col, Row, Stack } from "react-bootstrap"
 import { isThisMonth } from "../../utils/calendar"
 
+interface GCalendarProps {
+  monthMatrix: Moment[][]
+  indexMonth?: number
+  indexYear?: number
+}
+
 export function GCalendar({
   monthMatrix,
   indexMonth = moment().month(),
   indexYear = moment().year(),
-}: {
-  monthMatrix: Array<Array<Moment>>
-  indexMonth: number
-  indexYear: number
-}) {
+}: GCalendarProps) {
   const oneDayBefore = moment()
     .year(indexYear)
     .month(indexMonth)

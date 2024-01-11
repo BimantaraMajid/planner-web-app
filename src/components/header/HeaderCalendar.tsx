@@ -1,5 +1,6 @@
 import moment, { Moment } from "moment"
 import { Button, Row, Stack } from "react-bootstrap"
+import { BaseLogoutButton } from "../logout/BaseLogoutButton"
 
 export function HeaderCalendar({
   toggleSidebar,
@@ -40,7 +41,11 @@ export function HeaderCalendar({
         <div className="text-nowrap">{baseDate.format("MMMM Y")}</div>
 
         {/* right header */}
-        <div className="ms-auto">user</div>
+        <div className="ms-auto">
+          <BaseLogoutButton className="btn btn-link">
+            <span>logout</span>
+          </BaseLogoutButton>
+        </div>
         {width > 570 && (
           <Button
             size="sm"

@@ -1,10 +1,13 @@
 import { Col, Row } from "react-bootstrap"
 import moment from "moment"
-import { useLayoutEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 import { SidebarCalendar } from "../../components/sidebar/SidebarCalendar"
 import { getMatrixCalendar } from "../../utils/calendar"
 import { HeaderCalendar } from "../../components/header/HeaderCalendar"
 import { GCalendar } from "../../components/calendar/Gcalendar"
+import { LinkAnotherPage } from "../../components/Link"
+import { useAppDispatch } from "../../app/hooks"
+import { actionGetPlans } from "../../features/plans/plansSlice"
 
 function useWindowSize() {
   const [size, setSize] = useState([0, 0])
@@ -20,6 +23,18 @@ function useWindowSize() {
 }
 
 export function MainPage() {
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(
+      actionGetPlans({
+        limit: 10,
+        page: 1,
+        q: "",
+      }),
+    )
+  }, [dispatch])
+
   const [width] = useWindowSize()
   const [showSidebar, setShowSidebar] = useState(true)
   const [isoDate, setIsoDate] = useState(
@@ -51,6 +66,7 @@ export function MainPage() {
 
   return (
     <>
+      <LinkAnotherPage />
       <HeaderCalendar
         toggleSidebar={toggleSidebar}
         baseDate={baseDate}

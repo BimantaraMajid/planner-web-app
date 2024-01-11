@@ -6,17 +6,13 @@ import { AxiosError } from "axios"
 
 interface AuthState {
   isLogged: boolean
-  user: any
-  token: string | null
   error: string | null | undefined
   loading: boolean
 }
 
 const initialState: AuthState = {
   isLogged: false,
-  user: null,
-  token: null,
-  error: null,
+  error: undefined,
   loading: false,
 }
 
@@ -26,8 +22,14 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.isLogged = false
-      state.user = null
-      state.token = null
+      localStorage.removeItem("token")
+      localStorage.removeItem("refreshToken")
+    },
+    checkToken(state) {
+      const token = localStorage.getItem("token")
+      if (token) {
+        state.isLogged = true
+      }
     },
   },
   extraReducers: (builder) => {
@@ -37,8 +39,8 @@ const authSlice = createSlice({
       })
       .addCase(actionLogin.fulfilled, (state, action) => {
         state.loading = false
-        state.token = action.payload.data.token
-        state.user = action.payload.data.username
+        localStorage.setItem("token", action.payload.data.token)
+        localStorage.setItem("refreshToken", action.payload.data.refreshToken)
         state.isLogged = true
       })
       .addCase(actionLogin.rejected, (state, action) => {
@@ -64,7 +66,7 @@ export const actionLogin = createAsyncThunk(
   },
 )
 
-export const { logout } = authSlice.actions
+export const { logout, checkToken } = authSlice.actions
 export const getLogged = (state: RootState) => state.auth.isLogged
 export const getAuthLoading = (state: RootState) => state.auth.loading
 export const getAuthError = (state: RootState) => state.auth.error
