@@ -1,7 +1,7 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
 import { LoginRequest, LoginResponse } from "../../model/auth"
-import { postLogin } from "./authAPI"
+import { postLogin, setHeaderAuthorize } from "./authAPI"
 import { AxiosError } from "axios"
 
 interface AuthState {
@@ -20,6 +20,9 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setError(state, action: PayloadAction<string>) {
+      state.error = action.payload
+    },
     logout(state) {
       state.isLogged = false
       localStorage.removeItem("token")
@@ -39,8 +42,6 @@ const authSlice = createSlice({
       })
       .addCase(actionLogin.fulfilled, (state, action) => {
         state.loading = false
-        localStorage.setItem("token", action.payload.data.token)
-        localStorage.setItem("refreshToken", action.payload.data.refreshToken)
         state.isLogged = true
       })
       .addCase(actionLogin.rejected, (state, action) => {
@@ -54,7 +55,11 @@ export const actionLogin = createAsyncThunk(
   "auth/login",
   async (payload: LoginRequest) => {
     try {
-      const response = await postLogin(payload)
+      const response: LoginResponse = await postLogin(payload)
+      localStorage.setItem("token", response.data.token)
+      localStorage.setItem("refreshToken", response.data.refreshToken)
+      setHeaderAuthorize(response.data.token)
+
       return response as LoginResponse
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -67,6 +72,7 @@ export const actionLogin = createAsyncThunk(
 )
 
 export const { logout, checkToken } = authSlice.actions
+export const setAuthError = authSlice.actions.setError
 export const getLogged = (state: RootState) => state.auth.isLogged
 export const getAuthLoading = (state: RootState) => state.auth.loading
 export const getAuthError = (state: RootState) => state.auth.error

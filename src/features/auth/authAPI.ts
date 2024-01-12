@@ -8,3 +8,7 @@ export function postLogin(payload: LoginRequest) {
     password: payload.password,
   })
 }
+
+export function setHeaderAuthorize(token: string) {
+  API.setAuthorize(token)
+}
