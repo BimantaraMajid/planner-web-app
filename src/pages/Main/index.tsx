@@ -66,7 +66,6 @@ export function MainPage() {
 
   return (
     <>
-      <LinkAnotherPage />
       <HeaderCalendar
         toggleSidebar={toggleSidebar}
         baseDate={baseDate}

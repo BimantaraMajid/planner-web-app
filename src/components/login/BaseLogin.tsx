@@ -33,6 +33,9 @@ export function BaseLogin() {
 
       {error && <Alert variant="danger">{error}</Alert>}
 
+      <Alert variant="info">
+        username: majid <br /> password: majid
+      </Alert>
       <Form.Group>
         <Form.Label>Username</Form.Label>
         <Form.Control
